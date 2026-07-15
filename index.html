@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ion — Offer Generator · Prime Developments</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-mark">◆</span>
+      <span class="brand-name">PRIME</span>
+      <span class="brand-div"></span>
+      <span class="brand-project">ION</span>
+      <span class="brand-phase">Phase 2</span>
+    </div>
+    <div class="header-meta">
+      <span class="seed-flag" id="seedFlag" hidden>Demo inventory — pending real unit sheet</span>
+      Offer Generator
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- LEFT: master plan -->
+    <section class="panel map-panel">
+      <h2 class="panel-title">1 · Select a building</h2>
+      <div class="map-wrap" id="mapWrap">
+        <img id="masterplan" src="assets/masterplan-web.png" alt="Ion master plan" />
+        <div class="pins" id="pins"></div>
+      </div>
+      <p class="hint">Click a building on the master plan.</p>
+    </section>
+
+    <!-- RIGHT: controls + live offer -->
+    <section class="panel controls-panel">
+      <h2 class="panel-title">2 · Configure the offer</h2>
+
+      <div class="field">
+        <label>Building</label>
+        <div class="readout" id="buildingReadout">— none selected —</div>
+      </div>
+
+      <div class="field">
+        <label for="unitSelect">Unit</label>
+        <select id="unitSelect" disabled><option>Select a building first</option></select>
+      </div>
+
+      <div class="field">
+        <label for="planSelect">Payment plan</label>
+        <select id="planSelect"></select>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="contractDate">Contract date</label>
+          <input type="date" id="contractDate" />
+        </div>
+        <div class="field">
+          <label for="agentName">Sales rep</label>
+          <input type="text" id="agentName" placeholder="Name" />
+        </div>
+        <div class="field">
+          <label for="agentPhone">Phone</label>
+          <input type="text" id="agentPhone" placeholder="+20…" />
+        </div>
+      </div>
+
+      <!-- live summary -->
+      <div class="summary" id="summary" hidden>
+        <div class="summary-head">
+          <div class="summary-title" id="sumTitle"></div>
+          <div class="summary-sub" id="sumSub"></div>
+        </div>
+        <div class="summary-price">
+          <span class="price-label" id="priceLabel">Installment Price</span>
+          <span class="price-value" id="priceValue"></span>
+        </div>
+        <div class="summary-plan" id="sumPlan"></div>
+
+        <div class="unit-layout" id="unitLayout" hidden>
+          <div class="ul-label">Unit Layout</div>
+          <img id="floorplanImg" alt="Unit floor plan" />
+        </div>
+
+        <div class="schedule-scroll">
+          <table class="schedule" id="schedule"></table>
+        </div>
+
+        <div class="extras" id="extras"></div>
+      </div>
+
+      <button class="btn-primary" id="downloadBtn" disabled>Download PDF Offer</button>
+      <p class="hint" id="statusHint"></p>
+    </section>
+  </main>
+
+  <script src="js/engine.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/assets.js"></script>
+  <script src="vendor/jspdf.umd.min.js"></script>
+  <script src="js/pdf.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

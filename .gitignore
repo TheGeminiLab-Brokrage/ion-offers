@@ -1,0 +1,15 @@
+# Dev / build artifacts (not needed to run the site)
+node_modules/
+dist/
+*.log
+
+# Intermediate brochure page crops (source art lives elsewhere;
+# the site only uses assets/pdf/* and assets/masterplan*.png)
+assets/brochure/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Secrets (never committed)
+.env
