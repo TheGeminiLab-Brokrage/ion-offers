@@ -150,9 +150,9 @@
   // ── payment schedule page ──
   function schedulePage(doc, o, unit, building) {
     header(doc, "Payment Plan", unit.area + "m · " + unit.type + " · " + unit.building + "-" + "" + unit.floor);
-    var y = 28;
+    var y = 27;
     // summary strip
-    doc.setFillColor.apply(doc, NAVYT); doc.roundedRect(12, y, W - 24, 14, 2, 2, "F");
+    doc.setFillColor.apply(doc, NAVYT); doc.roundedRect(12, y, W - 24, 12, 2, 2, "F");
     var cells = [
       ["Unit", unit.building + " · " + unit.code],
       ["Type", unit.area + "m · " + unit.type],
@@ -165,11 +165,11 @@
     cells.forEach(function (c, i) {
       var cx = 12 + i * cw + 4;
       doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor.apply(doc, MUTE);
-      doc.text(c[0].toUpperCase(), cx, y + 5);
+      doc.text(c[0].toUpperCase(), cx, y + 4.5);
       doc.setFont("helvetica", "bold"); doc.setFontSize(9.5); doc.setTextColor.apply(doc, NAVY);
-      doc.text(String(c[1]), cx, y + 10.5);
+      doc.text(String(c[1]), cx, y + 9.5);
     });
-    y += 20;
+    y += 15;
 
     var down = o.rows[0], insts = o.rows.slice(1);
 
@@ -187,39 +187,37 @@
     fullRow("Down Payment", down.pct + " %", fmt(down.amount) + " LE", E.fmtDate(down.date), GREENT, GREEN);
 
     if (o.plan.type !== "cash") {
-      // two-column installment table
+      // two-column installment table — row height adapts so it never reaches the footer
       var colTop = y + 2;
       var half = Math.ceil(insts.length / 2);
       var cols = [{ x: 12, list: insts.slice(0, half) }, { x: 12 + (W - 24) / 2 + 3, list: insts.slice(half) }];
-      var colW = (W - 24) / 2 - 3, rh = 5.6;
-      var sub = [ // subcolumn offsets within colW
-        { k: "n", x: 3, align: "left", w: 30 },
-        { k: "pct", x: 42, align: "right", w: 22 },
-        { k: "amt", x: 96, align: "right", w: 30 },
-        { k: "date", x: colW - 3, align: "right", w: 30 },
-      ];
+      var colW = (W - 24) / 2 - 3;
+      var headerH = 6, footerTop = H - 14, reserveBelow = 42; // total row + 3 extras + disclaimer
+      var rh = Math.min(5.8, (footerTop - colTop - reserveBelow - headerH) / half);
+      if (rh < 3.6) rh = 3.6;
+      var fs = rh < 4.6 ? 6.6 : 7.6;
       cols.forEach(function (col) {
         var cy = colTop;
-        // header
-        doc.setFillColor.apply(doc, NAVY); doc.rect(col.x, cy, colW, rh + 1, "F");
+        doc.setFillColor.apply(doc, NAVY); doc.rect(col.x, cy, colW, headerH, "F");
         doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
         doc.text("Installment", col.x + 3, cy + 4);
         doc.text("%", col.x + 42, cy + 4, { align: "right" });
         doc.text("Amount", col.x + 96, cy + 4, { align: "right" });
         doc.text("Due Date", col.x + colW - 3, cy + 4, { align: "right" });
-        cy += rh + 1;
+        cy += headerH;
         col.list.forEach(function (r, idx) {
           if ((idx % 2) === 1) { doc.setFillColor(247, 249, 252); doc.rect(col.x, cy, colW, rh, "F"); }
-          doc.setTextColor.apply(doc, INK); doc.setFont("helvetica", "normal"); doc.setFontSize(7.6);
-          doc.text(r.label.replace(" Installment", ""), col.x + 3, cy + 3.9);
-          doc.setTextColor.apply(doc, MUTE); doc.text(r.pct + " %", col.x + 42, cy + 3.9, { align: "right" });
-          doc.setTextColor.apply(doc, INK); doc.text(fmt(r.amount), col.x + 96, cy + 3.9, { align: "right" });
-          doc.setTextColor.apply(doc, MUTE); doc.text(E.fmtDate(r.date), col.x + colW - 3, cy + 3.9, { align: "right" });
+          var ty = cy + rh - 1.7;
+          doc.setTextColor.apply(doc, INK); doc.setFont("helvetica", "normal"); doc.setFontSize(fs);
+          doc.text(r.label.replace(" Installment", ""), col.x + 3, ty);
+          doc.setTextColor.apply(doc, MUTE); doc.text(r.pct + " %", col.x + 42, ty, { align: "right" });
+          doc.setTextColor.apply(doc, INK); doc.text(fmt(r.amount), col.x + 96, ty, { align: "right" });
+          doc.setTextColor.apply(doc, MUTE); doc.text(E.fmtDate(r.date), col.x + colW - 3, ty, { align: "right" });
           cy += rh;
         });
-        doc.setDrawColor.apply(doc, LINE); doc.rect(col.x, colTop, colW, (rh + 1) + col.list.length * rh);
+        doc.setDrawColor.apply(doc, LINE); doc.rect(col.x, colTop, colW, headerH + col.list.length * rh);
       });
-      y = colTop + (rh + 1) + half * rh + 3;
+      y = colTop + headerH + half * rh + 3;
     }
 
     // total row
@@ -238,7 +236,7 @@
       doc.text(ex[0], 16, y + 4.7);
       doc.setFont("helvetica", "bold"); doc.setTextColor.apply(doc, NAVY);
       doc.text(String(ex[1]), W - 16, y + 4.7, { align: "right" });
-      y += 7.5;
+      y += 7;
     });
 
     // disclaimer
@@ -252,7 +250,7 @@
     opts = opts || {};
     var unit = state.unit, o = state.offer, building = state.building;
     var agent = { name: (document.getElementById("agentName") || {}).value || "", phone: (document.getElementById("agentPhone") || {}).value || "" };
-    var fpKey = unit.floorplan;
+    var fpKey = "fp-" + unit.floorplan;
 
     var need = [
       ["logoIon", A.logoIon], ["logoPrime", A.logoPrime], ["location", A.location],
