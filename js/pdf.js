@@ -255,7 +255,7 @@
     var need = [
       ["logoIon", A.logoIon], ["logoPrime", A.logoPrime], ["location", A.location],
       ["masterplan", A.masterplan], ["render1", A.render1], ["render2", A.render2], ["render3", A.render3],
-      ["floorplan", A[fpKey] || A["fp-2br-a"]],
+      ["floorplan", A[fpKey] || A["fp-2br-t1"]],
     ];
 
     return Promise.all(need.map(function (n) { return loadImage(n[1]).then(function (img) { return [n[0], img]; }); }))

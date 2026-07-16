@@ -121,7 +121,7 @@
       " & (" + o.plan.discount + "%) Discount" + (o.plan.type === "cash" ? "" : " / Equal");
 
     // live floor plan for the selected unit
-    var fpSrc = window.OfferAssets && (window.OfferAssets["fp-" + u.floorplan] || window.OfferAssets["fp-2br-a"]);
+    var fpSrc = window.OfferAssets && (window.OfferAssets["fp-" + u.floorplan] || window.OfferAssets["fp-2br-t1"]);
     var ul = document.getElementById("unitLayout"), fpImg = document.getElementById("floorplanImg");
     if (fpSrc && ul && fpImg) { fpImg.src = fpSrc; ul.hidden = false; } else if (ul) { ul.hidden = true; }
 

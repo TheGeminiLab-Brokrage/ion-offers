@@ -29,7 +29,7 @@ const assets = read("js/assets.js").replace(/"(assets\/[^"]+)"/g, (m, rel) => '"
 let html = read("index.html");
 html = html.slice(html.indexOf("<body>") + 6, html.indexOf("</body>"));
 html = html.replace(/\s*<script src="[^"]+"><\/script>/g, "").replace(/\s*<link rel="stylesheet"[^>]*>/g, "");
-html = html.replace('src="assets/masterplan-web.png"', 'src="' + dataURI("assets/masterplan-web.png") + '"');
+html = html.replace('src="assets/masterplan-web.jpg"', 'src="' + dataURI("assets/masterplan-web.jpg") + '"');
 
 const out = `<title>Ion — Offer Generator · Prime Developments</title>
 <style>

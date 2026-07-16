@@ -1,43 +1,52 @@
 /*
  * Source of truth for the Ion demo inventory.
  * Emits BOTH:
- *   - js/data.js                              (the app's data module)
+ *   - js/data.js                                      (the app's data module)
  *   - assets/deliverables/Ion-Phase2-Units-DEMO.xlsx  (Excel template/deliverable)
  * so the two can never drift. Run:  node scripts/generate-data.js
  *
- * Prices & areas are REAL (from the published Ion Phase-2 price list).
- * Unit codes / floors / views are realistic demo assignments.
+ * Layouts + areas are the REAL ones from "ion brochure Final" (each unit's area
+ * equals an actual floor-plan's area, so the matching layout always shows).
+ * Prices are computed per-m² using rates derived from the published price list.
  */
 const fs = require("fs");
 const path = require("path");
 const XLSX = require("xlsx");
 const ROOT = path.join(__dirname, "..");
 
-// Building pin positions (fraction of assets/masterplan.png, 1210x1210).
+// Building pin positions (fraction of assets/masterplan.png — the aerial plan).
 const PINS = {
-  B01: { x: 0.227, y: 0.135 }, B02: { x: 0.388, y: 0.139 }, B03: { x: 0.595, y: 0.131 },
-  B04: { x: 0.756, y: 0.120 }, B05: { x: 0.752, y: 0.304 }, B06: { x: 0.773, y: 0.502 },
-  B07: { x: 0.756, y: 0.618 }, B08: { x: 0.740, y: 0.845 }, B09: { x: 0.554, y: 0.705 },
-  B10: { x: 0.421, y: 0.616 }, B11: { x: 0.248, y: 0.525 }, B12: { x: 0.236, y: 0.310 },
+  B01: { x: 0.750, y: 0.790 }, B02: { x: 0.627, y: 0.771 }, B03: { x: 0.377, y: 0.797 },
+  B04: { x: 0.254, y: 0.824 }, B05: { x: 0.239, y: 0.648 }, B06: { x: 0.217, y: 0.455 },
+  B07: { x: 0.239, y: 0.333 }, B08: { x: 0.250, y: 0.137 }, B09: { x: 0.402, y: 0.257 },
+  B10: { x: 0.533, y: 0.320 }, B11: { x: 0.634, y: 0.432 }, B12: { x: 0.728, y: 0.602 },
 };
 
-// Sellable types — REAL area/price from the price list, mapped to a floor-plan asset.
-const CATALOG = [
-  { area: 113, bedrooms: 2, price: 5852835, floorplan: "2br-a" },
-  { area: 118, bedrooms: 2, price: 6111810, floorplan: "2br-a" },
-  { area: 124, bedrooms: 2, price: 6441058, floorplan: "2br-b" },
-  { area: 125, bedrooms: 2, price: 6375625, floorplan: "2br-b" },
-  { area: 129, bedrooms: 2, price: 6681555, floorplan: "2br-b" },
-  { area: 140, bedrooms: 3, price: 6082163, floorplan: "3br-a" },
-  { area: 153, bedrooms: 3, price: 7380720, floorplan: "3br-a" },
-  { area: 173, bedrooms: 3, price: 8687195, floorplan: "3br-b" },
-  { area: 177, bedrooms: 3, price: 8888055, floorplan: "3br-c" },
-  { area: 183, bedrooms: 3, price: 9017760, floorplan: "3br-d" },
-  { area: 190, bedrooms: 3, price: 9478811, floorplan: "3br-d" },
-  { area: 179, bedrooms: 4, price: 8988485, floorplan: "4br-a" },
+// Every sellable layout that exists in the brochure. area = the plan's gross area.
+// rate = per-m² price (from the price list: 2BR≈51,795 · 3BR≈49,888 · 4BR≈50,215).
+var LAYOUTS = [
+  { area: 124, bedrooms: 2, floorplan: "2br-t1", rate: 51795 },
+  { area: 140, bedrooms: 2, floorplan: "2br-t2", rate: 51795 },
+  { area: 123, bedrooms: 2, floorplan: "2br-t3", rate: 51795 },
+  { area: 190, bedrooms: 3, floorplan: "3br-t1", rate: 49888 },
+  { area: 204, bedrooms: 3, floorplan: "3br-t2", rate: 49888 },
+  { area: 149, bedrooms: 3, floorplan: "3br-t3", rate: 49888 },
+  { area: 169, bedrooms: 3, floorplan: "3br-t4", rate: 49888 },
+  { area: 197, bedrooms: 3, floorplan: "3br-t5", rate: 49888 },
+  { area: 183, bedrooms: 3, floorplan: "3br-t6", rate: 49888 },
+  { area: 159, bedrooms: 3, floorplan: "3br-t7", rate: 49888 },
+  { area: 226, bedrooms: 4, floorplan: "4br-t1", rate: 50215 },
+  { area: 222, bedrooms: 4, floorplan: "4br-t2", rate: 50215 },
+  { area: 200, bedrooms: 4, floorplan: "4br-t3", rate: 50215 },
+  { area: 197, bedrooms: 4, floorplan: "4br-t4", rate: 50215 },
+  { area: 225, bedrooms: 4, floorplan: "4br-t5", rate: 50215 },
 ];
-const VIEWS = ["Garden", "Pool", "Landscape", "Street"];
-const FLOORS = ["Ground", "1st", "2nd", "3rd", "4th", "5th", "6th", "7th"];
+var CATALOG = LAYOUTS.map(function (l) {
+  return { area: l.area, bedrooms: l.bedrooms, floorplan: l.floorplan, price: Math.round(l.area * l.rate) };
+});
+
+var VIEWS = ["Garden", "Pool", "Landscape", "Street"];
+var FLOORS = ["Ground", "1st", "2nd", "3rd", "4th", "5th", "6th", "7th"];
 
 // Deterministic PRNG so the demo is stable between runs.
 function mulberry32(a) {
@@ -52,34 +61,26 @@ const rnd = mulberry32(20260716);
 const pick = (arr) => arr[Math.floor(rnd() * arr.length)];
 
 const buildingCodes = Object.keys(PINS);
-const rows = []; // flat rows for Excel
+const rows = [];
 const buildings = buildingCodes.map(function (code) {
   const nUnits = 6 + Math.floor(rnd() * 4); // 6–9 units
   const units = [];
   const used = {};
   for (let i = 0; i < nUnits; i++) {
     const cat = pick(CATALOG);
-    const floorIdx = 1 + Math.floor(rnd() * 7); // 1st..7th (skip Ground for apartments)
-    const floorNum = floorIdx;
+    const floorIdx = 1 + Math.floor(rnd() * 7); // 1st..7th
     let unitNo, unitCode;
     do {
       unitNo = 1 + Math.floor(rnd() * 6);
-      unitCode = code + "-" + floorNum + String(unitNo).padStart(2, "0");
+      unitCode = code + "-" + floorIdx + String(unitNo).padStart(2, "0");
     } while (used[unitCode]);
     used[unitCode] = true;
 
     const unit = {
-      code: unitCode,
-      building: code,
-      floor: FLOORS[floorIdx],
-      bedrooms: cat.bedrooms,
-      type: cat.bedrooms + " Bedrooms",
-      category: "Typical Apartment",
-      finish: "Fully Finished",
-      area: cat.area,
-      view: pick(VIEWS),
-      price: cat.price,
-      floorplan: cat.floorplan,
+      code: unitCode, building: code, floor: FLOORS[floorIdx],
+      bedrooms: cat.bedrooms, type: cat.bedrooms + " Bedrooms",
+      category: "Typical Apartment", finish: "Fully Finished",
+      area: cat.area, view: pick(VIEWS), price: cat.price, floorplan: cat.floorplan,
     };
     units.push(unit);
     rows.push({
@@ -93,7 +94,7 @@ const buildings = buildingCodes.map(function (code) {
   return { code: code, pin: PINS[code], units: units };
 });
 
-// ── Write Excel deliverable ──
+// ── Excel deliverable ──
 const ws = XLSX.utils.json_to_sheet(rows);
 ws["!cols"] = [{ wch: 9 }, { wch: 11 }, { wch: 8 }, { wch: 12 }, { wch: 9 }, { wch: 11 }, { wch: 20 }, { wch: 14 }, { wch: 11 }, { wch: 10 }];
 const wb = XLSX.utils.book_new();
@@ -102,10 +103,11 @@ const xlsxDir = path.join(ROOT, "assets/deliverables");
 fs.mkdirSync(xlsxDir, { recursive: true });
 XLSX.writeFile(wb, path.join(xlsxDir, "Ion-Phase2-Units-DEMO.xlsx"));
 
-// ── Write app data module ──
+// ── App data module ──
 const dataModule = `/*
  * AUTO-GENERATED by scripts/generate-data.js — do not edit by hand.
- * Ion — Phase 2 demo inventory (real prices/areas, demo unit codes/floors/views).
+ * Ion — Phase 2 demo inventory (real layouts/areas from "ion brochure Final",
+ * prices computed per-m² from the published price list).
  */
 (function (root) {
   "use strict";
@@ -113,7 +115,7 @@ const dataModule = `/*
     project: { name: "Ion", phase: "Phase 2", developer: "Prime Developments", tagline: "Innovative living", deliveryText: "4 Years" },
     buildings: buildings,
     assets: {
-      masterplan: "assets/masterplan.png",
+      masterplan: "assets/masterplan-web.jpg",
       renders: ["assets/pdf/render1.jpg", "assets/pdf/render2.jpg", "assets/pdf/render3.jpg"],
     },
     isSeed: true,
@@ -124,6 +126,6 @@ const dataModule = `/*
 `;
 fs.writeFileSync(path.join(ROOT, "js/data.js"), dataModule);
 
-console.log("Generated " + rows.length + " units across " + buildings.length + " buildings.");
+console.log("Generated " + rows.length + " units across " + buildings.length + " buildings, " + CATALOG.length + " layouts.");
 console.log(" -> assets/deliverables/Ion-Phase2-Units-DEMO.xlsx");
 console.log(" -> js/data.js");
