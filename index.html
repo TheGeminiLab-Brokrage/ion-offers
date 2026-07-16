@@ -31,76 +31,93 @@
   </header>
 
   <main class="layout">
-    <!-- LEFT: master plan -->
-    <section class="panel map-panel">
-      <h2 class="panel-title">1 · Select a building</h2>
-      <div class="map-wrap" id="mapWrap">
+    <!-- STEP 1 · master plan -->
+    <section class="panel map-panel is-active" id="mapPanel">
+      <div class="step-head">
+        <span class="step-badge"><span class="num">1</span></span>
+        <div>
+          <div class="step-eyebrow">Step One</div>
+          <div class="step-title">Select a Building</div>
+        </div>
+      </div>
+      <div class="map-wrap inviting" id="mapWrap">
         <img id="masterplan" src="assets/masterplan-web.jpg" alt="Ion master plan" />
         <div class="pins" id="pins"></div>
       </div>
-      <p class="hint">Click a building on the master plan.</p>
+      <p class="hint">Tap a building pin on the master plan to see its available units.</p>
     </section>
 
-    <!-- RIGHT: controls + live offer -->
-    <section class="panel controls-panel">
-      <h2 class="panel-title">2 · Configure the offer</h2>
-
-      <div class="field">
-        <label>Building</label>
-        <div class="readout" id="buildingReadout">— none selected —</div>
+    <!-- STEP 2 · configure -->
+    <section class="panel controls-panel locked" id="configPanel">
+      <div class="step-head">
+        <span class="step-badge"><span class="num">2</span></span>
+        <div>
+          <div class="step-eyebrow">Step Two</div>
+          <div class="step-title">Configure the Offer</div>
+        </div>
       </div>
 
-      <div class="field">
-        <label for="unitSelect">Unit</label>
-        <select id="unitSelect" disabled><option>Select a building first</option></select>
-      </div>
+      <div class="lock-hint"><span class="dot">1</span> Select a building on the map to begin.</div>
 
-      <div class="field">
-        <label for="planSelect">Payment plan</label>
-        <select id="planSelect"></select>
-      </div>
-
-      <div class="field-row">
+      <div class="config-body">
         <div class="field">
-          <label for="contractDate">Contract date</label>
-          <input type="date" id="contractDate" />
+          <label>Building</label>
+          <div class="readout empty" id="buildingReadout">— none selected —</div>
         </div>
+
         <div class="field">
-          <label for="agentName">Sales rep</label>
-          <input type="text" id="agentName" placeholder="Name" />
+          <label for="unitSelect">Unit</label>
+          <select id="unitSelect" disabled><option>Select a building first</option></select>
         </div>
+
         <div class="field">
-          <label for="agentPhone">Phone</label>
-          <input type="text" id="agentPhone" placeholder="+20…" />
+          <label for="planSelect">Payment plan</label>
+          <select id="planSelect"></select>
         </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="contractDate">Contract date</label>
+            <input type="date" id="contractDate" />
+          </div>
+          <div class="field">
+            <label for="agentName">Sales rep</label>
+            <input type="text" id="agentName" placeholder="Name" />
+          </div>
+          <div class="field">
+            <label for="agentPhone">Phone</label>
+            <input type="text" id="agentPhone" placeholder="+20…" />
+          </div>
+        </div>
+
+        <!-- live offer -->
+        <div class="summary" id="summary" hidden>
+          <div class="summary-eyebrow">Your Offer</div>
+          <div class="summary-head">
+            <div class="summary-title" id="sumTitle"></div>
+            <div class="summary-sub" id="sumSub"></div>
+          </div>
+          <div class="summary-price">
+            <span class="price-label" id="priceLabel">Installment Price</span>
+            <span class="price-value" id="priceValue"></span>
+          </div>
+          <div class="summary-plan" id="sumPlan"></div>
+
+          <div class="unit-layout" id="unitLayout" hidden>
+            <div class="ul-label">Unit Layout</div>
+            <img id="floorplanImg" alt="Unit floor plan" />
+          </div>
+
+          <div class="schedule-scroll">
+            <table class="schedule" id="schedule"></table>
+          </div>
+
+          <div class="extras" id="extras"></div>
+        </div>
+
+        <button class="btn-primary" id="downloadBtn" disabled>Download PDF Offer</button>
+        <p class="hint" id="statusHint"></p>
       </div>
-
-      <!-- live summary -->
-      <div class="summary" id="summary" hidden>
-        <div class="summary-head">
-          <div class="summary-title" id="sumTitle"></div>
-          <div class="summary-sub" id="sumSub"></div>
-        </div>
-        <div class="summary-price">
-          <span class="price-label" id="priceLabel">Installment Price</span>
-          <span class="price-value" id="priceValue"></span>
-        </div>
-        <div class="summary-plan" id="sumPlan"></div>
-
-        <div class="unit-layout" id="unitLayout" hidden>
-          <div class="ul-label">Unit Layout</div>
-          <img id="floorplanImg" alt="Unit floor plan" />
-        </div>
-
-        <div class="schedule-scroll">
-          <table class="schedule" id="schedule"></table>
-        </div>
-
-        <div class="extras" id="extras"></div>
-      </div>
-
-      <button class="btn-primary" id="downloadBtn" disabled>Download PDF Offer</button>
-      <p class="hint" id="statusHint"></p>
     </section>
   </main>
 

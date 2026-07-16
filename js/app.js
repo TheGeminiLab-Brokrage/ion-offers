@@ -9,6 +9,9 @@
   var el = {
     pins: document.getElementById("pins"),
     map: document.getElementById("masterplan"),
+    mapPanel: document.getElementById("mapPanel"),
+    mapWrap: document.getElementById("mapWrap"),
+    configPanel: document.getElementById("configPanel"),
     buildingReadout: document.getElementById("buildingReadout"),
     unitSelect: document.getElementById("unitSelect"),
     planSelect: document.getElementById("planSelect"),
@@ -72,6 +75,15 @@
       p.classList.toggle("selected", p.dataset.code === b.code);
     });
     el.buildingReadout.textContent = b.code + " — " + b.units.length + " units available";
+    el.buildingReadout.classList.remove("empty");
+
+    // advance the guided flow: step 1 done, step 2 active + unlocked
+    el.mapWrap.classList.remove("inviting");
+    el.mapPanel.classList.remove("is-active");
+    el.mapPanel.classList.add("is-done");
+    el.configPanel.classList.remove("locked");
+    el.configPanel.classList.add("is-active");
+    el.unitSelect.classList.add("needs-pick"); // point the agent to the next control
 
     el.unitSelect.disabled = false;
     el.unitSelect.innerHTML = '<option value="">Select a unit…</option>';
@@ -89,6 +101,7 @@
   function onUnitChange() {
     var i = el.unitSelect.value;
     state.unit = (i === "") ? null : state.building.units[+i];
+    el.unitSelect.classList.toggle("needs-pick", i === ""); // clear the highlight once picked
     recompute();
   }
   function onPlanChange() {
